@@ -1,0 +1,12 @@
+<svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+  <rect x="12" y="14" width="32" height="30" rx="3" stroke="#0E7A5C" stroke-width="2" fill="#E3F5EF"/>
+  <line x1="12" y1="24" x2="44" y2="24" stroke="#0E7A5C" stroke-width="1.5"/>
+  <line x1="12" y1="34" x2="44" y2="34" stroke="#0E7A5C" stroke-width="1.5"/>
+  <text x="28" y="21" text-anchor="middle" font-size="7" font-weight="700" fill="#07503C" font-family="monospace">DNS</text>
+  <text x="28" y="31" text-anchor="middle" font-size="6" fill="#0E7A5C" font-family="monospace">A REC</text>
+  <text x="28" y="41" text-anchor="middle" font-size="6" fill="#0E7A5C" font-family="monospace" opacity=".7">CNAME</text>
+  <circle cx="28" cy="9" r="3" stroke="#0E7A5C" stroke-width="1.5" fill="none"/>
+  <line x1="28" y1="12" x2="28" y2="14" stroke="#0E7A5C" stroke-width="1.5"/>
+
+</svg>

@@ -1,0 +1,75 @@
+{
+  "_README": "Configuración de áreas y ubicaciones físicas de dispositivos",
+  "_FORMATO": "La clave es la IP del dispositivo, el valor es un objeto con información personalizada",
+
+  "143.248.201.1": {
+    "area": "Datacenter Principal",
+    "piso": "Planta Baja",
+    "rack": "A-01",
+    "contacto": "Administración IT",
+    "notas": "Gateway principal - Crítico",
+    "modem_info": ""
+  },
+
+  "143.248.201.228": {
+    "area": "Sala de Servidores Norte",
+    "piso": "2do Piso",
+    "rack": "B-15",
+    "contacto": "Departamento de Redes",
+    "notas": "Router core - Alta prioridad"
+  },
+
+  "143.248.201.208": {
+    "area": "Departamento de Investigación",
+    "piso": "3er Piso",
+    "rack": "C-08",
+    "contacto": "Dr. Kim Min-ho",
+    "notas": "Router dedicado a laboratorios"
+  },
+
+  "_EJEMPLO_MODEMS_TELMEX": {
+    "_NOTA": "Para el cliente de mañana con 8 módems Telmex, puedes agregar:",
+
+    "192.168.1.10": {
+      "area": "Recepción Principal",
+      "piso": "Planta Baja",
+      "modem_info": "Módem Telmex #1 - 200 Mbps",
+      "modem_sla": "200 Mbps contratados",
+      "contacto": "Soporte Telmex: 800-123-4567",
+      "notas": "Internet principal - Crítico"
+    },
+
+    "192.168.1.11": {
+      "area": "Planta Producción A",
+      "piso": "Planta Baja",
+      "modem_info": "Módem Telmex #2 - 100 Mbps",
+      "modem_sla": "100 Mbps contratados",
+      "contacto": "Jefe de Producción",
+      "notas": "Respaldo para producción"
+    },
+
+    "192.168.1.12": {
+      "area": "Oficinas Administrativas",
+      "piso": "1er Piso",
+      "modem_info": "Módem Telmex #3 - 200 Mbps",
+      "modem_sla": "200 Mbps contratados",
+      "contacto": "Contabilidad",
+      "notas": "Internet oficinas"
+    }
+  },
+
+  "_INSTRUCCIONES": {
+    "Como_usar": "Agrega la IP de cada dispositivo como clave y asigna los campos que necesites",
+    "Campos_sugeridos": [
+      "area: Ubicación física (ej: 'Datacenter', 'Oficina 205')",
+      "piso: Número de piso",
+      "rack: Identificador de rack",
+      "contacto: Persona responsable",
+      "notas: Información adicional",
+      "modem_info: Para módems, información del proveedor",
+      "modem_sla: SLA contratado",
+      "telefono: Teléfono de contacto"
+    ],
+    "Nota": "Cualquier campo personalizado que agregues se mostrará en el tooltip del dispositivo"
+  }
+}
