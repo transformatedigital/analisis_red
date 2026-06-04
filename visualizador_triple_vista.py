@@ -1530,6 +1530,11 @@ def generar(metadata, carpeta, areas_config={}):
                         <canvas id="deptChart"></canvas>
                     </div>
                 </div>
+                <div class="chart-box">
+                    <div class="chart-container">
+                        <canvas id="slaChart"></canvas>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -2186,105 +2191,67 @@ def generar(metadata, carpeta, areas_config={}):
             }}
         }});
 
-        // Gráfico 2: Velocidades de Módems (Real vs Contratada)
+        // Gráfico 2: Distribución de Velocidades (Dispositivos por Velocidad)
         const ctx2 = document.getElementById('speedChart').getContext('2d');
 
-        // Extraer módems con info de SLA
-        const modemsConSLA = dispositivosData.filter(d => {{
-            const areaInfo = areasConfig[d.ip];
-            return areaInfo && areaInfo.modem_sla;
-        }});
+        // Categorizar dispositivos por velocidad
+        const speedCategories = {{
+            '10 Gbps': 0,
+            '1 Gbps': 0,
+            '100 Mbps': 0,
+            '10 Mbps': 0,
+            'Otros/Unknown': 0
+        }};
 
-        const modemsLabels = modemsConSLA.map(d => {{
-            const areaInfo = areasConfig[d.ip];
-            return areaInfo.modem_info || d.hostname || d.ip;
-        }});
-
-        const velocidadesContratadas = modemsConSLA.map(d => {{
-            const areaInfo = areasConfig[d.ip];
-            const sla = areaInfo.modem_sla || '';
-            const match = sla.match(/(\d+)/);
-            return match ? parseInt(match[1]) : 0;
-        }});
-
-        const velocidadesReales = modemsConSLA.map(d => {{
+        dispositivosData.forEach(d => {{
             const vel = d.velocidad || '';
-            // Intentar extraer número de velocidad
-            if (vel.includes('Gbps')) {{
-                const match = vel.match(/([\d.]+)/);
-                return match ? parseFloat(match[1]) * 1000 : 0;
-            }} else if (vel.includes('Mbps')) {{
-                const match = vel.match(/(\d+)/);
-                return match ? parseInt(match[1]) : 0;
+            if (vel.includes('10') && vel.includes('Gbps')) {{
+                speedCategories['10 Gbps']++;
+            }} else if (vel.includes('1') && vel.includes('Gbps')) {{
+                speedCategories['1 Gbps']++;
+            }} else if (vel.includes('100') && vel.includes('Mbps')) {{
+                speedCategories['100 Mbps']++;
+            }} else if (vel.includes('10') && vel.includes('Mbps')) {{
+                speedCategories['10 Mbps']++;
+            }} else {{
+                speedCategories['Otros/Unknown']++;
             }}
-            return 0;
-        }});
-
-        // Calcular colores: verde si cumple >=90% SLA, amarillo si >=70%, rojo si <70%
-        const coloresReales = velocidadesReales.map((real, i) => {{
-            const contratada = velocidadesContratadas[i];
-            const porcentaje = contratada > 0 ? (real / contratada) * 100 : 0;
-            if (porcentaje >= 90) return '#10b981'; // Verde
-            if (porcentaje >= 70) return '#f59e0b'; // Amarillo
-            return '#ef4444'; // Rojo
         }});
 
         new Chart(ctx2, {{
             type: 'bar',
             data: {{
-                labels: modemsLabels.length > 0 ? modemsLabels : ['No hay módems con SLA configurado'],
-                datasets: [
-                    {{
-                        label: 'SLA Contratado',
-                        data: modemsLabels.length > 0 ? velocidadesContratadas : [0],
-                        backgroundColor: '#0ea5e9',
-                        borderColor: '#0284c7',
-                        borderWidth: 2
-                    }},
-                    {{
-                        label: 'Velocidad Real',
-                        data: modemsLabels.length > 0 ? velocidadesReales : [0],
-                        backgroundColor: modemsLabels.length > 0 ? coloresReales : ['#6b7280'],
-                        borderColor: modemsLabels.length > 0 ? coloresReales.map(c => c) : ['#4b5563'],
-                        borderWidth: 2
-                    }}
-                ]
+                labels: Object.keys(speedCategories),
+                datasets: [{{
+                    label: 'Dispositivos',
+                    data: Object.values(speedCategories),
+                    backgroundColor: ['#1e40af', '#0ea5e9', '#10b981', '#f59e0b', '#6b7280'],
+                    borderColor: ['#1e3a8a', '#0c4a6e', '#059669', '#d97706', '#374151'],
+                    borderWidth: 2
+                }}]
             }},
             options: {{
-                indexAxis: 'y',  // Horizontal bars
                 responsive: true,
                 maintainAspectRatio: true,
                 plugins: {{
                     title: {{
                         display: true,
-                        text: 'Módems: Velocidad Real vs SLA Contratado',
+                        text: 'Dispositivos por Velocidad de Conexión',
                         font: {{ size: 14, weight: 'bold' }}
                     }},
                     legend: {{
-                        position: 'bottom',
-                        labels: {{ font: {{ size: 10 }} }}
-                    }},
-                    tooltip: {{
-                        callbacks: {{
-                            label: function(context) {{
-                                const valor = context.parsed.x;
-                                const dataset = context.dataset.label;
-                                if (dataset === 'Velocidad Real') {{
-                                    const contratada = velocidadesContratadas[context.dataIndex];
-                                    const cumplimiento = contratada > 0 ? ((valor / contratada) * 100).toFixed(1) : 0;
-                                    return `${{dataset}}: ${{valor}} Mbps (${{cumplimiento}}% del SLA)`;
-                                }}
-                                return `${{dataset}}: ${{valor}} Mbps`;
-                            }}
-                        }}
+                        display: false
                     }}
                 }},
                 scales: {{
-                    x: {{
+                    y: {{
                         beginAtZero: true,
+                        ticks: {{
+                            stepSize: 1
+                        }},
                         title: {{
                             display: true,
-                            text: 'Velocidad (Mbps)'
+                            text: 'Número de Dispositivos'
                         }}
                     }}
                 }}
@@ -2383,6 +2350,111 @@ def generar(metadata, carpeta, areas_config={}):
                     x: {{
                         beginAtZero: true,
                         ticks: {{ stepSize: 1 }}
+                    }}
+                }}
+            }}
+        }});
+
+        // Gráfico 6: Módems - Velocidad Real vs SLA Contratado
+        const ctx6 = document.getElementById('slaChart').getContext('2d');
+
+        // Extraer módems con info de SLA
+        const modemsConSLA = dispositivosData.filter(d => {{
+            const areaInfo = areasConfig[d.ip];
+            return areaInfo && areaInfo.modem_sla;
+        }});
+
+        const modemsLabels = modemsConSLA.map(d => {{
+            const areaInfo = areasConfig[d.ip];
+            return areaInfo.modem_info || d.hostname || d.ip;
+        }});
+
+        const velocidadesContratadas = modemsConSLA.map(d => {{
+            const areaInfo = areasConfig[d.ip];
+            const sla = areaInfo.modem_sla || '';
+            const match = sla.match(/(\d+)/);
+            return match ? parseInt(match[1]) : 0;
+        }});
+
+        const velocidadesReales = modemsConSLA.map(d => {{
+            const vel = d.velocidad || '';
+            // Intentar extraer número de velocidad
+            if (vel.includes('Gbps')) {{
+                const match = vel.match(/([\d.]+)/);
+                return match ? parseFloat(match[1]) * 1000 : 0;
+            }} else if (vel.includes('Mbps')) {{
+                const match = vel.match(/(\d+)/);
+                return match ? parseInt(match[1]) : 0;
+            }}
+            return 0;
+        }});
+
+        // Calcular colores: verde si cumple >=90% SLA, amarillo si >=70%, rojo si <70%
+        const coloresReales = velocidadesReales.map((real, i) => {{
+            const contratada = velocidadesContratadas[i];
+            const porcentaje = contratada > 0 ? (real / contratada) * 100 : 0;
+            if (porcentaje >= 90) return '#10b981'; // Verde
+            if (porcentaje >= 70) return '#f59e0b'; // Amarillo
+            return '#ef4444'; // Rojo
+        }});
+
+        new Chart(ctx6, {{
+            type: 'bar',
+            data: {{
+                labels: modemsLabels.length > 0 ? modemsLabels : ['No hay módems con SLA configurado'],
+                datasets: [
+                    {{
+                        label: 'SLA Contratado',
+                        data: modemsLabels.length > 0 ? velocidadesContratadas : [0],
+                        backgroundColor: '#0ea5e9',
+                        borderColor: '#0284c7',
+                        borderWidth: 2
+                    }},
+                    {{
+                        label: 'Velocidad Real',
+                        data: modemsLabels.length > 0 ? velocidadesReales : [0],
+                        backgroundColor: modemsLabels.length > 0 ? coloresReales : ['#6b7280'],
+                        borderColor: modemsLabels.length > 0 ? coloresReales.map(c => c) : ['#4b5563'],
+                        borderWidth: 2
+                    }}
+                ]
+            }},
+            options: {{
+                indexAxis: 'y',  // Horizontal bars
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {{
+                    title: {{
+                        display: true,
+                        text: 'Módems: Velocidad Real vs SLA Contratado',
+                        font: {{ size: 14, weight: 'bold' }}
+                    }},
+                    legend: {{
+                        position: 'bottom',
+                        labels: {{ font: {{ size: 10 }} }}
+                    }},
+                    tooltip: {{
+                        callbacks: {{
+                            label: function(context) {{
+                                const valor = context.parsed.x;
+                                const dataset = context.dataset.label;
+                                if (dataset === 'Velocidad Real') {{
+                                    const contratada = velocidadesContratadas[context.dataIndex];
+                                    const cumplimiento = contratada > 0 ? ((valor / contratada) * 100).toFixed(1) : 0;
+                                    return `${{dataset}}: ${{valor}} Mbps (${{cumplimiento}}% del SLA)`;
+                                }}
+                                return `${{dataset}}: ${{valor}} Mbps`;
+                            }}
+                        }}
+                    }}
+                }},
+                scales: {{
+                    x: {{
+                        beginAtZero: true,
+                        title: {{
+                            display: true,
+                            text: 'Velocidad (Mbps)'
+                        }}
                     }}
                 }}
             }}
