@@ -1,0 +1,136 @@
+{
+  "192.168.1.10": {
+    "area": "Enlace Principal",
+    "piso": "Datacenter - Rack A1",
+    "rack": "A-01",
+    "modem_info": "Módem Infinitum #1 - Principal",
+    "modem_sla": "100 Mbps contratados",
+    "contacto": "Juan Pérez - Gerente TI",
+    "notas": "⚠️ Rendimiento bajo (85%) - Revisar con ISP"
+  },
+  "192.168.1.11": {
+    "area": "Enlace Secundario",
+    "piso": "Datacenter - Rack A2",
+    "rack": "A-02",
+    "modem_info": "Módem Infinitum #2 - Respaldo",
+    "modem_sla": "200 Mbps contratados",
+    "contacto": "Juan Pérez - Gerente TI",
+    "notas": "✅ Funcionando correctamente (90%)"
+  },
+  "192.168.1.12": {
+    "area": "Enlace Sucursal",
+    "piso": "Piso 1 - Área Común",
+    "rack": "N/A",
+    "modem_info": "Módem Infinitum #3 - Sucursal",
+    "modem_sla": "100 Mbps contratados",
+    "contacto": "María González - Soporte",
+    "notas": "🔴 CRÍTICO: Solo 45% del SLA - Requiere atención URGENTE"
+  },
+  "192.168.1.13": {
+    "area": "Enlace VoIP",
+    "piso": "Piso 2 - Telefonía",
+    "rack": "B-03",
+    "modem_info": "Módem Infinitum #4 - VoIP",
+    "modem_sla": "100 Mbps contratados",
+    "contacto": "Carlos Martínez - Telefonía",
+    "notas": "✅ Buen rendimiento (95%)"
+  },
+  "192.168.1.1": {
+    "area": "Core Network",
+    "piso": "Datacenter Principal",
+    "rack": "Core-01",
+    "contacto": "Juan Pérez - Gerente TI",
+    "notas": "Gateway principal - Crítico para operaciones"
+  },
+  "192.168.1.20": {
+    "area": "Core Switch",
+    "piso": "Datacenter Principal",
+    "rack": "Core-02",
+    "contacto": "Juan Pérez - Gerente TI",
+    "notas": "Switch Core Cisco Catalyst 9500 - 10Gbps"
+  },
+  "192.168.1.21": {
+    "area": "Switch Piso 1",
+    "piso": "Piso 1 - Rack Principal",
+    "rack": "P1-01",
+    "contacto": "Soporte TI",
+    "notas": "Cisco Catalyst 2960 - Administración y Contabilidad"
+  },
+  "192.168.1.22": {
+    "area": "Switch Piso 2",
+    "piso": "Piso 2 - Rack Principal",
+    "rack": "P2-01",
+    "contacto": "Soporte TI",
+    "notas": "Cisco Catalyst 2960 - Ventas y Marketing"
+  },
+  "192.168.1.23": {
+    "area": "Switch Piso 3",
+    "piso": "Piso 3 - Rack Principal",
+    "rack": "P3-01",
+    "contacto": "Soporte TI",
+    "notas": "Cisco Catalyst 2960 - Desarrollo y Operaciones"
+  },
+  "192.168.1.24": {
+    "area": "Switch Datacenter",
+    "piso": "Datacenter Principal",
+    "rack": "DC-01",
+    "contacto": "Juan Pérez - Gerente TI",
+    "notas": "Cisco Catalyst 9500 - 10Gbps para servidores"
+  },
+  "192.168.1.25": {
+    "area": "Switch Almacén",
+    "piso": "Planta Baja - Almacén",
+    "rack": "ALM-01",
+    "contacto": "Roberto Silva - Logística",
+    "notas": "HP ProCurve - Producción y Almacén"
+  },
+  "192.168.1.30": {
+    "area": "Servidor Web",
+    "piso": "Datacenter - Rack S1",
+    "rack": "S-01",
+    "contacto": "Desarrollo Web",
+    "notas": "Servidor Web de Producción - NGINX"
+  },
+  "192.168.1.31": {
+    "area": "Servidor Database",
+    "piso": "Datacenter - Rack S1",
+    "rack": "S-02",
+    "contacto": "DBA - Miguel Ángel",
+    "notas": "MySQL 8.0 - Base de datos principal"
+  },
+  "192.168.1.32": {
+    "area": "Servidor Backup",
+    "piso": "Datacenter - Rack S2",
+    "rack": "S-03",
+    "contacto": "Juan Pérez - Gerente TI",
+    "notas": "Veeam Backup - Backups diarios 2AM"
+  },
+  "192.168.1.33": {
+    "area": "Servidor Exchange",
+    "piso": "Datacenter - Rack S2",
+    "rack": "S-04",
+    "contacto": "Administrador Email",
+    "notas": "Microsoft Exchange 2019"
+  },
+  "192.168.1.34": {
+    "area": "File Server",
+    "piso": "Datacenter - Rack S2",
+    "rack": "S-05",
+    "contacto": "Soporte TI",
+    "notas": "Windows Server 2019 - Archivos compartidos"
+  },
+  "192.168.1.35": {
+    "area": "Servidor ERP",
+    "piso": "Datacenter - Rack S3",
+    "rack": "S-06",
+    "contacto": "Administrador SAP",
+    "notas": "SAP ERP - CRÍTICO para operaciones"
+  },
+  "192.168.1.110": {
+    "area": "NAS Backup",
+    "piso": "Datacenter - Rack S4",
+    "rack": "S-10",
+    "contacto": "Juan Pérez - Gerente TI",
+    "notas": "Synology DS1821+ - 8 bahías con RAID 6"
+  }
+}
