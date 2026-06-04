@@ -127,7 +127,51 @@ python3 visualizador_triple_vista.py diagnostico_*_enriquecido.zip
 
 ### **Paso 3: Entrega**
 
-Enviar `dashboard_triple_vista.html` al cliente por email.
+**Opción A: Archivo HTML directo**
+```bash
+# Enviar dashboard_triple_vista.html al cliente por email
+# El archivo es completamente portable y funciona offline
+```
+
+**Opción B: Publicar en GitHub Pages**
+```bash
+# Copiar dashboard a docs/
+cp gemelo_*/dashboard_triple_vista.html docs/index.html
+
+# Commit y push
+git add docs/
+git commit -m "Actualizar dashboard publicado"
+git push origin main
+
+# URL pública: https://transformatedigital.github.io/analisis_red/
+```
+
+---
+
+## 🌐 GitHub Pages (Dashboard Público)
+
+Este proyecto incluye soporte para GitHub Pages. Puedes publicar dashboards en:
+
+**https://transformatedigital.github.io/analisis_red/**
+
+### Cómo Habilitar (Solo Primera Vez):
+
+1. Ve a tu repositorio en GitHub
+2. **Settings** → **Pages**
+3. **Source**: Deploy from a branch
+4. **Branch**: `main` → **Folder**: `/docs` → **Save**
+
+### Cómo Actualizar el Dashboard:
+
+```bash
+# Después de generar análisis
+cp gemelo_Cliente_YYYYMMDD/dashboard_triple_vista.html docs/index.html
+git add docs/index.html
+git commit -m "Actualizar dashboard"
+git push origin main
+```
+
+⚠️ **Seguridad:** GitHub Pages es público. No publiques datos confidenciales de clientes. Usa datos anonimizados para demos.
 
 ---
 
