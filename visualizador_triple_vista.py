@@ -6,6 +6,9 @@ Visualizador Triple Vista - Con logos y 3 topologías
 import os, sys, json, zipfile, datetime, webbrowser
 from collections import defaultdict
 
+# Mostrar/ocultar la pestaña de Métricas Ejecutivas en el dashboard generado
+MOSTRAR_METRICAS_EJECUTIVAS = False
+
 def cargar(zip_file):
     carpeta = "gemelo_" + datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     with zipfile.ZipFile(zip_file, 'r') as z:
@@ -168,7 +171,11 @@ def analizar_red(dispositivos, conexiones, metadata, areas_config={}):
         })
 
     # Velocidad de internet baja para investigación
-    download_speed = float(metadata.get('velocidad_internet', {}).get('download', '0 Mbit/s').split()[0])
+    download_raw = metadata.get('velocidad_internet', {}).get('download', '0 Mbit/s')
+    try:
+        download_speed = float(str(download_raw).split()[0])
+    except (ValueError, IndexError):
+        download_speed = 0.0
     if download_speed < 100 and tipos_count.get('server', 0) > 5:
         issues['recomendacion'].append({
             'titulo': f'Velocidad de Internet Baja ({download_speed:.1f} Mbps)',
@@ -245,7 +252,7 @@ def calcular_salud(issues, speeds, total_devices):
 
     return max(0, min(100, int(score)))
 
-def generar(metadata, carpeta, areas_config={}):
+def generar(metadata, carpeta, areas_config={}, inventario=None):
     import shutil
 
     dispositivos = metadata['dispositivos']
@@ -2464,6 +2471,26 @@ def generar(metadata, carpeta, areas_config={}):
 </html>
 """
 
+    if not MOSTRAR_METRICAS_EJECUTIVAS:
+        html = html.replace(
+            """<button class="tab" onclick="switchView('metricas', this)">📈 Métricas Ejecutivas</button>""",
+            ''
+        )
+
+    # Insertar sección de Inventario IT antes de la topología (si se proporcionó)
+    if inventario:
+        from seccion_inventario import generar_seccion_inventario
+        scan_stats = {
+            'total_online': len(metadata['dispositivos']),
+            'telefonos_online': sum(1 for d in metadata['dispositivos'] if d.get('tipo') == 'iot'),
+        }
+        seccion_inv = generar_seccion_inventario(inventario, scan_stats)
+        anchor = '<h2 class="section-title">🗺️ Topología de Red - Vista Dual</h2>'
+        html = html.replace(
+            '<div class="section">\n            ' + anchor,
+            seccion_inv + '\n\n        <div class="section">\n            ' + anchor
+        )
+
     ruta = os.path.join(carpeta, "dashboard_triple_vista.html")
     with open(ruta, 'w', encoding='utf-8') as f:
         f.write(html)
@@ -2472,7 +2499,7 @@ def generar(metadata, carpeta, areas_config={}):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Uso: python3 visualizador_triple_vista.py <archivo.zip>")
+        print("Uso: python3 visualizador_triple_vista.py <archivo.zip> [inventario_stats.json]")
         sys.exit(1)
 
     metadata, carpeta = cargar(sys.argv[1])
@@ -2480,12 +2507,21 @@ if __name__ == "__main__":
         print("Error cargando datos")
         sys.exit(1)
 
+    # Inventario IT opcional (datos del administrador de red del cliente)
+    inventario = None
+    if len(sys.argv) > 2:
+        from seccion_inventario import cargar_inventario
+        inventario = cargar_inventario(sys.argv[2])
+        if inventario:
+            metadata['empresa']['nombre'] += ' + Datos Alfredo'
+            print(f"📦 Inventario IT cargado: {inventario['total_equipos']} equipos")
+
     # Cargar configuración de áreas personalizadas
     areas_config = cargar_areas_config()
     if areas_config:
         print(f"📍 Configuración de áreas cargada: {len(areas_config)} dispositivos etiquetados")
 
-    ruta = generar(metadata, carpeta, areas_config)
+    ruta = generar(metadata, carpeta, areas_config, inventario)
     print(f"\n✅ {os.path.abspath(ruta)}\n")
 
     webbrowser.open('file://' + os.path.abspath(ruta))

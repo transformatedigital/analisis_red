@@ -25,23 +25,49 @@ def inferir_tipo(device):
     if ip.endswith('.1') or 'gateway' in hostname:
         return 'gateway'
 
+    # Fortinet = firewall perimetral (en esta red es también el gateway,
+    # pero el hostname 'gateway' lo captura arriba)
+    if 'fortinet' in vendor or 'fortigate' in hostname:
+        return 'firewall'
+
+    # Servidores: VMs VMware, hostnames de servidor, hosts ESXi
+    if 'vmware' in vendor or 'srv' in hostname or 'esxi' in hostname:
+        return 'server'
+
+    # NAS Synology
+    if 'synology' in vendor or 'nas' in hostname:
+        return 'server'
+
+    # Cámaras / NVR Hikvision
+    if 'hikvision' in vendor or 'nvr' in hostname or 'camara' in hostname:
+        return 'camera'
+
+    # HPE (enterprise) = equipo de red, antes que la regla genérica de HP
+    if 'hewlett packard enterprise' in vendor or 'switch' in hostname:
+        return 'switch'
+
+    # Grandstream = telefonía IP (terminal IoT)
+    if 'grandstream' in vendor:
+        return 'iot'
+
+    # Ubiquiti = switches / access points
+    if 'ubiquiti' in vendor:
+        return 'switch'
+
     # Juniper suele ser router/firewall
     if 'juniper' in vendor:
         return 'router'
 
-    # Synology es NAS (servidor)
-    if 'synology' in vendor:
-        return 'server'
-
-    # HP puede ser servidor o impresora
+    # HP: impresora si lo indica, si no equipo de usuario
+    # (inventario del cliente confirma que sus Dell/HP son laptops/escritorios)
     if 'hp' in vendor or 'hewlett' in vendor:
         if 'laserjet' in vendor or 'printer' in hostname:
             return 'printer'
-        return 'server'
+        return 'workstation'
 
-    # Dell suele ser servidor o workstation
+    # Dell = equipo de usuario (Vostro/ProDesk según inventario)
     if 'dell' in vendor:
-        return 'server'
+        return 'workstation'
 
     # Asus, Gigabyte = workstation/desktop
     if any(x in vendor for x in ['asus', 'giga-byte', 'gigabyte', 'asustek']):
@@ -59,26 +85,30 @@ def inferir_tipo(device):
     return 'workstation'
 
 def asignar_departamento(tipo, index):
-    """Asigna departamento basado en tipo de dispositivo"""
+    """Asigna área funcional basada en tipo de dispositivo (sin inventar departamentos)"""
     if tipo in ['gateway', 'router', 'firewall']:
         return 'Core'
     elif tipo == 'server':
-        departamentos_servidores = ['IT', 'Datos', 'Infraestructura']
-        return departamentos_servidores[index % len(departamentos_servidores)]
+        return 'Infraestructura'
     elif tipo == 'switch':
         return 'Networking'
+    elif tipo == 'iot':
+        return 'Telefonía IP'
+    elif tipo == 'camera':
+        return 'Videovigilancia'
+    elif tipo == 'printer':
+        return 'Impresión'
     else:
-        departamentos_usuarios = ['Desarrollo', 'Investigación', 'Administración', 'Operaciones']
-        return departamentos_usuarios[index % len(departamentos_usuarios)]
+        return 'Usuarios'
 
 def enriquecer_metadata(metadata_simple):
     """Enriquece metadata simple con tipos, conexiones y jerarquía"""
 
-    # Información de la empresa
+    # Información de la empresa (tomada del metadata del escaneo)
     empresa = {
-        "nombre": "KAIS-GDI",
-        "ubicacion": "Corea del Sur",
-        "tipo": "Departamento de Investigación y Desarrollo"
+        "nombre": metadata_simple.get('empresa', 'Cliente'),
+        "ubicacion": "",
+        "tipo": ""
     }
 
     # Primer pase: identificar tipos sin asignar padres
@@ -87,6 +117,13 @@ def enriquecer_metadata(metadata_simple):
     tipo_counters = {}
 
     for idx, device in enumerate(metadata_simple['dispositivos']):
+        # Resolver vendor ANTES de inferir tipo (el tipo depende del vendor)
+        vendor_mejorado = get_vendor(
+            device.get('mac', ''),
+            device.get('vendor', '')
+        )
+        device = {**device, 'vendor': vendor_mejorado}
+
         tipo = inferir_tipo(device)
 
         # Contador para nombres
@@ -146,12 +183,6 @@ def enriquecer_metadata(metadata_simple):
         except:
             latencia_ms = '0'
 
-        # Mejorar identificación de vendor usando MAC
-        vendor_mejorado = get_vendor(
-            device.get('mac', ''),
-            device.get('vendor', '')
-        )
-
         device_enriquecido = {
             'ip': device['ip'],
             'hostname': hostname,
@@ -167,6 +198,23 @@ def enriquecer_metadata(metadata_simple):
         }
 
         dispositivos_temp.append(device_enriquecido)
+
+    # Si el gateway de la config no fue escaneado (vive en otra subred),
+    # crear su nodo para que la topología tenga raíz y los switches tengan uplink
+    if not any(d['tipo'] == 'gateway' for d in dispositivos_temp):
+        dispositivos_temp.append({
+            'ip': gateway_ip,
+            'hostname': 'Router-Gateway (no escaneado)',
+            'mac': 'N/A',
+            'vendor': 'Fuera de subred escaneada',
+            'tipo': 'gateway',
+            'departamento': 'Core',
+            'latencia': '0',
+            'padre': None,
+            'velocidad': '10 Gbps',
+            'servicios': ['routing'],
+            'estado': 'up'
+        })
 
     # Segundo pase: asignar jerarquía realista
     dispositivos_enriquecidos = []
